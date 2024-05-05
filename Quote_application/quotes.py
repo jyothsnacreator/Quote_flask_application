@@ -185,4 +185,24 @@ def get_delete(id=None):
     # return to the quotes page
     return redirect("/quotes")
 
+# Modify your Flask route to handle the search request
+@app.route("/search", methods=["POST"])
+def search_quotes():
+    session_id = request.cookies.get("session_id", None)
+    if not session_id:
+        return redirect("/login")
+    
+    search_term = request.form.get("searchTerm", "").strip()
+    
+    if search_term:
+        quotes_collection = quotes_db.quotes_collection
+        user = session_db.session_collection.find_one({"session_id": session_id}).get("user", "unknown user")
+        data = list(quotes_collection.find({"owner": user}))
+        search_results = [quote for quote in data if search_term.lower() in quote.get("text", "").lower()]
+        # Highlight search results
+        for quote in search_results:
+            quote['text'] = quote['text'].replace(search_term, f'<span class="highlight">{search_term}</span>')
+        return render_template("quotes.html", data=search_results, user=user)
+    else:
+        return redirect("/quotes")
 

@@ -29,12 +29,12 @@
     </head>
     <body style="background:radial-gradient(rgb(121, 121, 235),white);">
            <div>
-            <search class="search-container" style="float: right; margin-top: 20px;">
-              <form action="./search/" >
-                <input type="search" id="movie" name="q" />
-                <button type="submit">Search</button>
-              </form>
-            </search>
+            <form action="/search" method="POST" style="float: right; margin: 20px;">
+              <input type="text" name="searchTerm" id="searchInput" placeholder="Search...">
+              <button type="submit" id="searchButton">Search</button>
+          </form>
+          
+          </div>
           </div>
           <br>
           <br>
@@ -81,5 +81,29 @@
     <div style="background-color: rgb(206, 235, 102); width:100%;">
     <p style="size: 20px;"> To add or see comments click on the <i class="bi bi-chat-dots-fill"></i> icon  </p>
     </div>
+
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchButton = document.getElementById("searchButton");
+            const searchInput = document.getElementById("searchInput");
+
+            searchButton.addEventListener("click", function() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                const quotes = document.querySelectorAll(".quote p");
+
+                quotes.forEach(quote => {
+                    const quoteText = quote.textContent.toLowerCase();
+                    if (quoteText.includes(searchTerm)) {
+                        quote.classList.add("highlight");
+                    } else {
+                        quote.classList.remove("highlight");
+                    }
+                });
+            });
+        });
+    </script>
     </body>
 </html>
