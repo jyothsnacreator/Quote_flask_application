@@ -184,3 +184,5 @@ def get_delete(id=None):
         quotes_collection.delete_one({"_id": ObjectId(id)})
     # return to the quotes page
     return redirect("/quotes")
+
+
