@@ -2,10 +2,12 @@
 import json
 from mongita import MongitaClientDisk
 
+# Modify the quotes_data to include comments
 quotes_data = [
-    {"text": "I'm hungry. When's lunch?", "author": "Dorothy","owner":"Greg"},
-    {"text": "You threw that ball. You go get it.", "author": "Suzy", "owner":"Dorothy"},
+    {"text": "I'm hungry. When's lunch?", "author": "jyo", "owner": "jyo", "comments": []},
+    {"text": "You threw that ball. You go get it.", "author": "jyo", "owner": "jyo", "comments": []},
 ]
+
 
 # create a mongita client connection
 client = MongitaClientDisk()

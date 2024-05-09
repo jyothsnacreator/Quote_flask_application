@@ -1,3 +1,5 @@
+from importlib.resources import contents
+from flask import Flask
 from flask import Flask, render_template, request, make_response, redirect
 from mongita import MongitaClientDisk
 from bson import ObjectId
@@ -35,7 +37,7 @@ def get_quotes():
     # open the quotes collection
     quotes_collection = quotes_db.quotes_collection
     # load the data
-    data = list(quotes_collection.find({"owner":user}))
+    data = list(quotes_collection.find())
     for item in data:
         item["_id"] = str(item["_id"])
         item["object"] = ObjectId(item["_id"])
@@ -66,6 +68,7 @@ def post_login():
     user_collection = user_db.user_collection
     # look for the user
     user_data = list(user_collection.find({"user": user}))
+    print(user_collection)
     if len(user_data) != 1:
         response = redirect("/login")
         response.delete_cookie("session_id")
@@ -128,8 +131,50 @@ def post_add():
         # open the quotes collection
         quotes_collection = quotes_db.quotes_collection
         # insert the quote
-        quote_data = {"owner": user, "text": text, "author": author}
+        quote_data = {"owner": user, "text": text, "author": author, "comments": []}
         quotes_collection.insert_one(quote_data)
+    # usually do a redirect('....')
+    return redirect("/quotes")
+
+@app.route("/add_comment/<id>", methods=["POST"])
+def add_comment_for_quote(id=None):
+    session_id = request.cookies.get("session_id", None)
+    if not session_id:
+        response = redirect("/login")
+        return response
+    # open the session collection
+    session_collection = session_db.session_collection
+    # get the data for this session
+    session_data = list(session_collection.find({"session_id": session_id}))
+    if len(session_data) == 0:
+        response = redirect("/logout")
+        return response
+    assert len(session_data) == 1
+    session_data = session_data[0]
+    # get some information from the session
+    user = session_data.get("user", "unknown user")
+    text = request.form.get("comment_text", "")
+    if text != "":
+        # open the quotes collection
+        quotes_collection = quotes_db.quotes_collection
+        data = quotes_collection.find_one({"_id": ObjectId(id)})
+        comments = data["comments"]
+        comments.append(text)
+        data["comments"] = comments
+        data["id"] = str(data["_id"])
+        # update the values in this particular record
+        values = {"$set": {"comments": comments}}
+        quotes_collection.update_one({"_id": ObjectId(id)}, values)
+        # display the data
+        html = render_template(
+            "comments.html",
+            data=data,
+            user=user,
+        )
+        
+        response = make_response(html)
+        response.set_cookie("session_id", session_id)
+        return response
     # usually do a redirect('....')
     return redirect("/quotes")
 
@@ -149,6 +194,23 @@ def get_edit(id=None):
         return render_template("edit_quote.html", data=data)
     # return to the quotes page
     return redirect("/quotes")
+
+@app.route("/comments/<id>", methods=["GET"])
+def get_comment(id=None):
+    session_id = request.cookies.get("session_id", None)
+    if not session_id:
+        response = redirect("/login")
+        return response
+    if id:
+        # open the quotes collection
+        quotes_collection = quotes_db.quotes_collection
+        # get the item
+        data = quotes_collection.find_one({"_id": ObjectId(id)})
+        data["id"] = str(data["_id"])
+        return render_template("comments.html", data=data)
+    # return to the quotes page
+    return redirect("/quotes")
+
 
 
 @app.route("/edit", methods=["POST"])
@@ -185,7 +247,7 @@ def get_delete(id=None):
     # return to the quotes page
     return redirect("/quotes")
 
-# Modify your Flask route to handle the search request
+#  to handle the search request
 @app.route("/search", methods=["POST"])
 def search_quotes():
     session_id = request.cookies.get("session_id", None)
@@ -205,4 +267,8 @@ def search_quotes():
         return render_template("quotes.html", data=search_results, user=user)
     else:
         return redirect("/quotes")
+
+
+
+
 

@@ -9,16 +9,41 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Protest+Revolution&display=swap" rel="stylesheet">
         <title>Comment on quote</title>
     </head>
+
+
+
+
     <body style="background:radial-gradient(rgb(121, 121, 235),white);">
-        <h1 style="text-align: center; font-family: Protest Revolution;">Comments</h1><br><br>
-        <div style="text-align: center;">
-        <lablel>Comment</lablel>
-        <textarea cols="20" rows="3" style="box-shadow: 7px 7px black; border-radius: 5px;"></textarea><br><br>
-        <span>
-        <button style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: 2px black; border-radius: 5px; cursor: pointer;font-family: poppins; box-shadow: 7px 7px black;" >Submit</button>
-        <button style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: 2px black; border-radius: 5px; cursor: pointer;font-family: poppins; box-shadow: 7px 7px black;" >edit</button><br><br>
-        <br>
-        </span>
-        <button style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: 2px black; border-radius: 5px; cursor: pointer;font-family: poppins; box-shadow: 7px 7px black;" ><a href="/" style="color: white; text-decoration: none;">Cancel</a></button>
+
+        <div style="text-align: center; margin-top: 100px; ">
+        <h1>Comments</h1>
+            <br>
+            <br>
+            <br>
+        <form action="/add_comment/{{data['id']}}" method="POST">
+            <textarea name="comment_text" id ="comment_text" cols="30" rows="3"></textarea>
+            <button type="submit">Add Comment</button>
+        </form>
+        <table style="margin: auto;">
+            {% for item in data["comments"] %}
+            <tr>
+                <td>
+                    [{{item}}]
+                </td>
+                
+                <td>
+                    [
+                    <a href="/edit/{{item['_id']}}"><i class="bi bi-pencil-square"></i></a>
+                    <a href="/delete/{{item['_id']}}"><i class="bi bi-trash-fill"></i></a>
+                    
+                    ]
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+   
+
+    <a href="/quotes">Return to Quotes</a>
         </div>
     </body>
+</html>
